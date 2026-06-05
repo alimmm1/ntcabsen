@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi - Naung Teduh Cafe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-main: #f3eee7;       
+            --primary: #3d2c1f;       
+            --accent: #bc8a5f;        
+            --accent-light: #f5ebe0;  
+            --text-dark: #2b2017;     
+            --text-muted: #8c7e74;    
+            --white: #ffffff;         
+            --success: #3a5a40;       
+            --danger: #ba1a1a;        
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: 1fr 1.6fr;
+            }
+        }
+
+        .card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(61, 44, 31, 0.06); 
+            border: 1px solid rgba(188, 138, 95, 0.08);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-dark);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(140, 126, 116, 0.25);
+            border-radius: 12px;
+            font-size: 14px;
+            color: var(--text-dark);
+            background-color: #fdfdfd;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--accent);
+            background-color: var(--white);
+            box-shadow: 0 0 0 4px rgba(188, 138, 95, 0.12);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #2b1f15;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: var(--accent);
+        }
+
+        .btn-success:hover {
+            background-color: var(--primary);
+        }
+
+        .filter-zone {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+            margin-bottom: 24px;
+            background: #faf8f5;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(188, 138, 95, 0.1);
+        }
+
+        .filter-zone select {
+            padding: 10px 12px;
+            font-size: 13px;
+            border-radius: 10px;
+            border: 1px solid rgba(140, 126, 116, 0.25);
+            background-color: var(--white);
+        }
+
+        #btnFilter {
+            padding: 0 24px;
+            font-size: 13px;
+            border-radius: 10px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        th {
+            background-color: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--accent-light);
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #f5ebe0;
+            color: var(--text-dark);
+            background-color: var(--white);
+        }
+
+        tr:hover td {
+            background-color: #faf8f5;
+        }
+
+        .action-cell {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .badge {
+            background-color: var(--accent-light);
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .btn-detail {
+            background-color: transparent;
+            color: var(--accent);
+            border: 1px solid rgba(188, 138, 95, 0.4);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            width: auto;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-detail:hover {
+            background-color: var(--accent);
+            color: var(--white);
+        }
+
+        .alert {
+            padding: 12px;
+            background-color: #e8f5e9;
+            color: var(--success);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            border: 1px solid rgba(58, 90, 64, 0.15);
+        }
+
+        /* --- STYLING UNTUK MODAL POP-UP --- */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 999; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(61, 44, 31, 0.5); /* Overlay Gelap Gelisah */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            padding: 25px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--accent-light);
+            padding-bottom: 10px;
+        }
+
+        .modal-header h3 {
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .close-modal {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: var(--danger);
+        }
+
+        .modal-list {
+            list-style: none;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .modal-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #fdfdfd;
+            background: #faf8f5;
+            margin-bottom: 6px;
+            border-radius: 8px;
+        }
+
+        .btn-delete-single {
+            background-color: var(--danger);
+            color: var(--white);
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            width: auto;
+            cursor: pointer;
+        }
+
+        .btn-delete-single:hover {
+            background-color: #941313;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Naung Teduh Cafe</h1>
+        <p>Sistem Absensi & Rekap Bulanan Karyawan (Cloud)</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div>
+                <h2>Form Absen Hadir</h2>
+                <div id="alertAbsen" class="alert">Presensi berhasil dicatat di server Cloud.</div>
+                <form id="formAbsen">
+                    <div class="form-group">
+                        <label for="namaKaryawan">Nama Karyawan</label>
+                        <select id="namaKaryawan" required>
+                            <option value="">-- Pilih Nama Anda --</option>
+                            <option value="Alimm">Alimm</option>
+                            <option value="Rahman">Rahman</option>
+                            <option value="Safir">Safir</option>
+                            <option value="Iyos">Iyos</option>
+                            <option value="Firda">Firda</option>
+                            <option value="Wardah">Wardah</option>
+                            <option value="Jaya">Jaya</option>
+                            <option value="Sahifah">Sahifah</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tanggalAbsen">Pilih Tanggal</label>
+                        <input type="date" id="tanggalAbsen" required>
+                    </div>
+                    <button type="submit" class="btn-success">Konfirmasi Kehadiran</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div>
+                <h2>Rekap Total Kehadiran Karyawan</h2>
+                
+                <div class="filter-zone">
+                    <select id="filterBulan">
+                        <option value="01">Januari</option>
+                        <option value="02">Februari</option>
+                        <option value="03">Maret</option>
+                        <option value="04">April</option>
+                        <option value="05">Mei</option>
+                        <option value="06">Juni</option>
+                        <option value="07">Juli</option>
+                        <option value="08">Agustus</option>
+                        <option value="09">September</option>
+                        <option value="10">Oktober</option>
+                        <option value="11">November</option>
+                        <option value="12">Desember</option>
+                    </select>
+                    <select id="filterTahun">
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                    </select>
+                    <button id="btnFilter" class="btn-primary">Tampilkan</button>
+                </div>
+
+                <div class="table-container">
+                    <table id="tabelRekap">
+                        <thead>
+                            <tr>
+                                <th>Karyawan</th>
+                                <th>Periode</th>
+                                <th>Total Masuk / Koreksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalKaryawanName">Detail Tanggal</h3>
+                <span class="close-modal" id="closeModal">&times;</span>
+            </div>
+            <ul id="modalListTanggal" class="modal-list">
+                </ul>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA4Ya0Ho-IBCN9pw0DVy32tGrjBSIBaoGk",
+            authDomain: "absensi-naung-teduh-cafe.firebaseapp.com",
+            databaseURL: "https://absensi-naung-teduh-cafe-default-rtdb.firebaseio.com",
+            projectId: "absensi-naung-teduh-cafe",
+            storageBucket: "absensi-naung-teduh-cafe.firebasestorage.app",
+            messagingSenderId: "1086207640594",
+            appId: "1:1086207640594:web:f7d3ea6e22eb7cbc1144cb",
+            measurementId: "G-TSCYTYL365"
+        };
+
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const dbRefAbsen = ref(db, "absensi");
+
+        // Set default tanggal hari ini
+        document.getElementById('tanggalAbsen').valueAsDate = new Date();
+        const tglSekarang = new Date();
+        document.getElementById('filterBulan').value = String(tglSekarang.getMonth() + 1).padStart(2, '0');
+
+        let dataAbsensiGlobal = [];
+        let karyawanAktifDiModal = "";
+
+        // Tarik data secara real-time dari Firebase Cloud Database
+        onValue(dbRefAbsen, (snapshot) => {
+            const data = snapshot.val();
+            dataAbsensiGlobal = [];
+            
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    dataAbsensiGlobal.push({
+                        id: key,
+                        nama: data[key].nama,
+                        tanggal: data[key].tanggal
+                    });
+                });
+            }
+            hitungDanTampilkanRekap();
+            
+            // Jika modal sedang terbuka, segarkan isinya secara real-time
+            if(document.getElementById('detailModal').style.display === "flex") {
+                bukaDetailKaryawan(karyawanAktifDiModal);
+            }
+        });
+
+        // Proses submit form absensi ke Firebase
+        document.getElementById('formAbsen').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nama = document.getElementById('namaKaryawan').value;
+            const tanggal = document.getElementById('tanggalAbsen').value;
+
+            // Cek duplikasi lokal dari data global cloud
+            const sudahAbsen = dataAbsensiGlobal.some(absen => absen && absen.nama === nama && absen.tanggal === tanggal);
+            
+            if (sudahAbsen) {
+                alert(`${nama} sudah tercatat melakukan absensi pada tanggal tersebut.`);
+                return;
+            }
+
+            // Push data langsung ke Firebase Cloud
+            push(dbRefAbsen, { nama, tanggal })
+                .then(() => {
+                    const alertBox = document.getElementById('alertAbsen');
+                    alertBox.style.display = 'block';
+                    setTimeout(() => alertBox.style.display = 'none', 3000);
+                    document.getElementById('namaKaryawan').value = "";
+                })
+                .catch((error) => {
+                    alert("Gagal mencatat absen: " + error.message);
+                });
+        });
+
+        function hitungDanTampilkanRekap() {
+            const bulanDipilih = document.getElementById('filterBulan').value;
+            const tahunDipilih = document.getElementById('filterTahun').value;
+            const tbody = document.querySelector('#tabelRekap tbody');
+            tbody.innerHTML = '';
+
+            const daftarKaryawan = ["Alimm", "Rahman", "Safir", "Iyos", "Firda", "Wardah", "Jaya", "Sahifah"];
+
+            const dataTerfilter = dataAbsensiGlobal.filter(absen => {
+                if (absen && absen.tanggal && absen.tanggal.includes('-')) {
+                    const [tahun, bulan] = absen.tanggal.split('-');
+                    return bulan === bulanDipilih && tahun === tahunDipilih;
+                }
+                return false;
+            });
+
+            daftarKaryawan.forEach(karyawan => {
+                const riwayatKaryawan = dataTerfilter.filter(absen => absen.nama === karyawan);
+                const totalMasuk = riwayatKaryawan.length;
+                const namaBulan = document.getElementById('filterBulan').options[document.getElementById('filterBulan').selectedIndex].text;
+                
+                // Pasang tombol detail jika total masuk > 0
+                const tombolAksi = totalMasuk > 0 
+                    ? `<button class="btn-detail" data-nama="${karyawan}">Lihat Detail</button>` 
+                    : '';
+
+                const row = `<tr>
+                    <td style="font-weight: 600; color: var(--primary);">${karyawan}</td>
+                    <td style="color: var(--text-muted); font-size: 13px;">${namaBulan} ${tahunDipilih}</td>
+                    <td>
+                        <div class="action-cell">
+                            <span class="badge">${totalMasuk} Hari</span>
+                            ${tombolAksi}
+                        </div>
+                    </td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+
+            // Pasang event klik tombol "Lihat Detail"
+            document.querySelectorAll('.btn-detail').forEach(button => {
+                button.addEventListener('click', function() {
+                    const nama = this.getAttribute('data-nama');
+                    karyawanAktifDiModal = nama;
+                    bukaDetailKaryawan(nama);
+                });
+            });
+        }
+
+        // Fungsi membuka Pop-up Detail tanggal absen per anak
+        function bukaDetailKaryawan(nama) {
+            const bulanDipilih = document.getElementById('filterBulan').value;
+            const tahunDipilih = document.getElementById('filterTahun').value;
+            const modal = document.getElementById('detailModal');
+            const modalTitle = document.getElementById('modalKaryawanName');
+            const modalList = document.getElementById('modalListTanggal');
+
+            modalTitle.innerText = `Riwayat Masuk: ${nama}`;
+            modalList.innerHTML = "";
+
+            // Ambil absensi milik karyawan ini di bulan terpilih, urutkan tanggal terbaru
+            const riwayatKaryawan = dataAbsensiGlobal
+                .filter(absen => {
+                    if (absen.nama === nama && absen.tanggal.includes('-')) {
+                        const [tahun, bulan] = absen.tanggal.split('-');
+                        return bulan === bulanDipilih && tahun === tahunDipilih;
+                    }
+                    return false;
+                })
+                .sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+
+            if(riwayatKaryawan.length === 0) {
+                modal.style.display = "none";
+                return;
+            }
+
+            riwayatKaryawan.forEach(item => {
+                const tglDiformat = item.tanggal.split('-').reverse().join('-');
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span style="font-size: 13px; font-weight:600;">${tglDiformat}</span>
+                    <button class="btn-delete-single" data-id="${item.id}" data-tanggal="${tglDiformat}">Hapus</button>
+                `;
+                modalList.appendChild(li);
+            });
+
+            modal.style.display = "flex";
+
+            // Pasang fungsionalitas tombol Hapus Per Tanggal Tunggal
+            document.querySelectorAll('.btn-delete-single').forEach(btn => {
+                btn.onclick = function() {
+                    const idData = this.getAttribute('data-id');
+                    const tanggalTeks = this.getAttribute('data-tanggal');
+
+                    if (confirm(`Hapus data absensi ${nama} pada tanggal ${tanggalTeks}? (Gunakan jika salah input)`)) {
+                        remove(ref(db, `absensi/${idData}`))
+                            .then(() => {
+                                alert("Data salah input berhasil dihapus.");
+                            })
+                            .catch(err => alert("Gagal: " + err.message));
+                    }
+                };
+            });
+        }
+
+        // Penutup Modal Pop-up
+        document.getElementById('closeModal').onclick = function() {
+            document.getElementById('detailModal').style.display = "none";
+        }
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        document.getElementById('btnFilter').addEventListener('click', hitungDanTampilkanRekap);
+    </script>
+</body>
+</html>
