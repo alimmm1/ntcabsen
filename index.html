@@ -409,7 +409,7 @@
                         <input type="date" id="tanggalAbsen" required>
                     </div>
                     <div class="form-group">
-                        <label for="fotoDokumentasi">Foto Dokumentasi (Maks 5MB)</label>
+                        <label for="fotoDokumentasi">Foto Dokumentasi (Maks 10MB)</label>
                         <input type="file" id="fotoDokumentasi" accept="image/*" required>
                         <div class="preview-container" id="previewContainer">
                             <img id="imgPreview" src="" alt="Preview">
@@ -507,8 +507,8 @@
         document.getElementById('fotoDokumentasi').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                // Validasi ukuran (Maksimal 1MB agar database tidak kepenuhan)
-if (file.size > 5 * 1024 * 1024) {
+                // Validasi ukuran (Maksimal 10MB agar database tidak kepenuhan)
+if (file.size > 10 * 1024 * 1024) {
     alert("Ukuran file terlalu besar! Maksimal adalah 5MB.");
     this.value = "";
     document.getElementById('previewContainer').style.display = 'none';
