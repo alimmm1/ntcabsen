@@ -118,6 +118,19 @@
             box-shadow: 0 0 0 4px rgba(188, 138, 95, 0.12);
         }
 
+        /* Preview Gambar */
+        .preview-container {
+            margin-top: 10px;
+            display: none;
+            text-align: center;
+        }
+        .preview-container img {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 10px;
+            border: 2px dashed var(--accent);
+        }
+
         button {
             width: 100%;
             padding: 14px;
@@ -260,7 +273,7 @@
             top: 0;
             width: 100%; 
             height: 100%; 
-            background-color: rgba(61, 44, 31, 0.5); /* Overlay Gelap Gelisah */
+            background-color: rgba(61, 44, 31, 0.5); 
             align-items: center;
             justify-content: center;
         }
@@ -269,8 +282,8 @@
             background-color: var(--white);
             padding: 25px;
             border-radius: 20px;
-            width: 90%;
-            max-width: 450px;
+            width: 95%;
+            max-width: 500px;
             box-shadow: 0 15px 40px rgba(0,0,0,0.15);
             animation: popIn 0.3s ease;
         }
@@ -307,20 +320,45 @@
 
         .modal-list {
             list-style: none;
-            max-height: 250px;
+            max-height: 350px;
             overflow-y: auto;
             padding-right: 5px;
         }
 
         .modal-list li {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
+            flex-direction: column;
+            gap: 10px;
+            padding: 12px;
             border-bottom: 1px solid #fdfdfd;
             background: #faf8f5;
-            margin-bottom: 6px;
+            margin-bottom: 10px;
             border-radius: 8px;
+        }
+
+        .item-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-doc {
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .item-doc img {
+            max-width: 100%;
+            max-height: 120px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid rgba(188, 138, 95, 0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .item-doc img:hover {
+            transform: scale(1.03);
         }
 
         .btn-delete-single {
@@ -343,19 +381,19 @@
 
     <header>
         <h1>Naung Teduh Cafe</h1>
-        <p>Sistem Absensi & Rekap Bulanan Karyawan (Cloud)</p>
+        <p>Sistem Absensi & Rekap Bulanan Karyawan</p>
     </header>
 
     <div class="container">
         <div class="card">
             <div>
                 <h2>Form Absen Hadir</h2>
-                <div id="alertAbsen" class="alert">Presensi berhasil dicatat di server Cloud.</div>
+                <div id="alertAbsen" class="alert">Presensi berhasil dicatat.</div>
                 <form id="formAbsen">
                     <div class="form-group">
                         <label for="namaKaryawan">Nama Karyawan</label>
                         <select id="namaKaryawan" required>
-                            <option value="">-- Pilih Nama Anda --</option>
+                            <option value="">Pilih Nama Anda</option>
                             <option value="Alimm">Alimm</option>
                             <option value="Rahman">Rahman</option>
                             <option value="Safir">Safir</option>
@@ -369,6 +407,13 @@
                     <div class="form-group">
                         <label for="tanggalAbsen">Pilih Tanggal</label>
                         <input type="date" id="tanggalAbsen" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fotoDokumentasi">Foto Dokumentasi (Maks 1MB)</label>
+                        <input type="file" id="fotoDokumentasi" accept="image/*" required>
+                        <div class="preview-container" id="previewContainer">
+                            <img id="imgPreview" src="" alt="Preview">
+                        </div>
                     </div>
                     <button type="submit" class="btn-success">Konfirmasi Kehadiran</button>
                 </form>
@@ -411,7 +456,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -425,7 +470,7 @@
                 <span class="close-modal" id="closeModal">&times;</span>
             </div>
             <ul id="modalListTanggal" class="modal-list">
-                </ul>
+            </ul>
         </div>
     </div>
 
@@ -456,6 +501,30 @@
 
         let dataAbsensiGlobal = [];
         let karyawanAktifDiModal = "";
+        let base64Foto = ""; // Menyimpan string foto sementara
+
+        // Event Listener untuk Preview & Mengonversi Foto ke Base64
+        document.getElementById('fotoDokumentasi').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validasi ukuran (Maksimal 1MB agar database tidak kepenuhan)
+                if (file.size > 1024 * 1024) {
+                    alert("Ukuran file terlalu besar! Maksimal adalah 1MB.");
+                    this.value = "";
+                    document.getElementById('previewContainer').style.display = 'none';
+                    base64Foto = "";
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    base64Foto = event.target.result;
+                    document.getElementById('imgPreview').src = base64Foto;
+                    document.getElementById('previewContainer').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
         // Tarik data secara real-time dari Firebase Cloud Database
         onValue(dbRefAbsen, (snapshot) => {
@@ -467,7 +536,8 @@
                     dataAbsensiGlobal.push({
                         id: key,
                         nama: data[key].nama,
-                        tanggal: data[key].tanggal
+                        tanggal: data[key].tanggal,
+                        foto: data[key].foto || "" // Handle data lama jika belum ada fotonya
                     });
                 });
             }
@@ -494,13 +564,23 @@
                 return;
             }
 
-            // Push data langsung ke Firebase Cloud
-            push(dbRefAbsen, { nama, tanggal })
+            if (!base64Foto) {
+                alert("Harap unggah foto dokumentasi terlebih dahulu.");
+                return;
+            }
+
+            // Push data langsung ke Firebase Cloud (Termasuk string Foto)
+            push(dbRefAbsen, { nama, tanggal, foto: base64Foto })
                 .then(() => {
                     const alertBox = document.getElementById('alertAbsen');
                     alertBox.style.display = 'block';
                     setTimeout(() => alertBox.style.display = 'none', 3000);
+                    
+                    // Reset Form & Preview
                     document.getElementById('namaKaryawan').value = "";
+                    document.getElementById('fotoDokumentasi').value = "";
+                    document.getElementById('previewContainer').style.display = 'none';
+                    base64Foto = "";
                 })
                 .catch((error) => {
                     alert("Gagal mencatat absen: " + error.message);
@@ -556,7 +636,7 @@
             });
         }
 
-        // Fungsi membuka Pop-up Detail tanggal absen per anak
+        // Fungsi membuka Pop-up Detail tanggal absen + Foto Dokumentasi
         function bukaDetailKaryawan(nama) {
             const bulanDipilih = document.getElementById('filterBulan').value;
             const tahunDipilih = document.getElementById('filterTahun').value;
@@ -586,9 +666,18 @@
             riwayatKaryawan.forEach(item => {
                 const tglDiformat = item.tanggal.split('-').reverse().join('-');
                 const li = document.createElement('li');
+                
+                // Tag gambar kondisional jika ada foto dokumentasi
+                const wadahFoto = item.foto 
+                    ? `<div class="item-doc"><img src="${item.foto}" alt="Dokumentasi" onclick="window.open('${item.foto}', '_blank')"></div>`
+                    : `<div class="item-doc" style="color:var(--text-muted); font-size:11px;">Tidak ada foto</div>`;
+
                 li.innerHTML = `
-                    <span style="font-size: 13px; font-weight:600;">${tglDiformat}</span>
-                    <button class="btn-delete-single" data-id="${item.id}" data-tanggal="${tglDiformat}">Hapus</button>
+                    <div class="item-info">
+                        <span style="font-size: 13px; font-weight:600;">${tglDiformat}</span>
+                        <button class="btn-delete-single" data-id="${item.id}" data-tanggal="${tglDiformat}">Hapus</button>
+                    </div>
+                    ${wadahFoto}
                 `;
                 modalList.appendChild(li);
             });
