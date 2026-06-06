@@ -381,19 +381,19 @@
 
     <header>
         <h1>Naung Teduh Cafe</h1>
-        <p>Sistem Absensi & Rekap Bulanan Karyawan</p>
+        <p>Sistem Absensi & Rekap Bulanan Karyawan (Cloud)</p>
     </header>
 
     <div class="container">
         <div class="card">
             <div>
                 <h2>Form Absen Hadir</h2>
-                <div id="alertAbsen" class="alert">Presensi berhasil dicatat.</div>
+                <div id="alertAbsen" class="alert">Presensi berhasil dicatat di server Cloud.</div>
                 <form id="formAbsen">
                     <div class="form-group">
                         <label for="namaKaryawan">Nama Karyawan</label>
                         <select id="namaKaryawan" required>
-                            <option value="">Pilih Nama Anda</option>
+                            <option value="">-- Pilih Nama Anda --</option>
                             <option value="Alimm">Alimm</option>
                             <option value="Rahman">Rahman</option>
                             <option value="Safir">Safir</option>
@@ -508,13 +508,13 @@
             const file = e.target.files[0];
             if (file) {
                 // Validasi ukuran (Maksimal 1MB agar database tidak kepenuhan)
-                if (file.size > 1024 * 1024) {
-                    alert("Ukuran file terlalu besar! Maksimal adalah 1MB.");
-                    this.value = "";
-                    document.getElementById('previewContainer').style.display = 'none';
-                    base64Foto = "";
-                    return;
-                }
+if (file.size > 5 * 1024 * 1024) {
+    alert("Ukuran file terlalu besar! Maksimal adalah 5MB.");
+    this.value = "";
+    document.getElementById('previewContainer').style.display = 'none';
+    base64Foto = "";
+    return;
+}
 
                 const reader = new FileReader();
                 reader.onload = function(event) {
