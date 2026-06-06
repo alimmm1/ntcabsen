@@ -381,14 +381,14 @@
 
     <header>
         <h1>Naung Teduh Cafe</h1>
-        <p>Sistem Absensi & Rekap Bulanan Karyawan (Cloud)</p>
+        <p>Sistem Absensi & Rekap Bulanan Karyawan</p>
     </header>
 
     <div class="container">
         <div class="card">
             <div>
                 <h2>Form Absen Hadir</h2>
-                <div id="alertAbsen" class="alert">Presensi berhasil dicatat di server Cloud.</div>
+                <div id="alertAbsen" class="alert">Presensi berhasil dicatat.</div>
                 <form id="formAbsen">
                     <div class="form-group">
                         <label for="namaKaryawan">Nama Karyawan</label>
@@ -409,7 +409,7 @@
                         <input type="date" id="tanggalAbsen" required>
                     </div>
                     <div class="form-group">
-                        <label for="fotoDokumentasi">Foto Dokumentasi (Maks 10MB)</label>
+                        <label for="fotoDokumentasi">Foto Dokumentasi</label>
                         <input type="file" id="fotoDokumentasi" accept="image/*" required>
                         <div class="preview-container" id="previewContainer">
                             <img id="imgPreview" src="" alt="Preview">
@@ -501,26 +501,59 @@
 
         let dataAbsensiGlobal = [];
         let karyawanAktifDiModal = "";
-        let base64Foto = ""; // Menyimpan string foto sementara
+        let base64Foto = ""; // Menyimpan string foto setelah dikompresi
 
-        // Event Listener untuk Preview & Mengonversi Foto ke Base64
+        // Event Listener untuk Preview & Kompresi Foto Otomatis ke < 1MB
         document.getElementById('fotoDokumentasi').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                // Validasi ukuran (Maksimal 10MB agar database tidak kepenuhan)
-if (file.size > 10 * 1024 * 1024) {
-    alert("Ukuran file terlalu besar! Maksimal adalah 5MB.");
-    this.value = "";
-    document.getElementById('previewContainer').style.display = 'none';
-    base64Foto = "";
-    return;
-}
+                // Batas file mentah maksimal 20MB agar browser tidak crash saat processing
+                if (file.size > 20 * 1024 * 1024) {
+                    alert("Ukuran file terlalu besar! Maksimal file mentah adalah 20MB.");
+                    this.value = "";
+                    document.getElementById('previewContainer').style.display = 'none';
+                    base64Foto = "";
+                    return;
+                }
 
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    base64Foto = event.target.result;
-                    document.getElementById('imgPreview').src = base64Foto;
-                    document.getElementById('previewContainer').style.display = 'block';
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function() {
+                        // Inisialisasi Canvas HTML5 untuk proses resize gambar
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+
+                        // Skema pengubahan resolusi (Maksimal dimensi lebar/tinggi adalah 1024px)
+                        let width = img.width;
+                        let height = img.height;
+                        const max_size = 1024; 
+
+                        if (width > height) {
+                            if (width > max_size) {
+                                height *= max_size / width;
+                                width = max_size;
+                            }
+                        } else {
+                            if (height > max_size) {
+                                width *= max_size / height;
+                                height = max_size;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Kompresi kualitas gambar menjadi 70% (0.7)
+                        // Kombinasi resize 1024px + kualitas 0.7 akan menjamin ukuran akhir jauh di bawah 1MB
+                        base64Foto = canvas.toDataURL('image/jpeg', 0.7); 
+                        
+                        // Masukkan ke preview container
+                        document.getElementById('imgPreview').src = base64Foto;
+                        document.getElementById('previewContainer').style.display = 'block';
+                    };
                 };
                 reader.readAsDataURL(file);
             }
@@ -537,7 +570,7 @@ if (file.size > 10 * 1024 * 1024) {
                         id: key,
                         nama: data[key].nama,
                         tanggal: data[key].tanggal,
-                        foto: data[key].foto || "" // Handle data lama jika belum ada fotonya
+                        foto: data[key].foto || "" 
                     });
                 });
             }
@@ -569,7 +602,7 @@ if (file.size > 10 * 1024 * 1024) {
                 return;
             }
 
-            // Push data langsung ke Firebase Cloud (Termasuk string Foto)
+            // Push data langsung ke Firebase Cloud (Termasuk string Foto hasil kompresi)
             push(dbRefAbsen, { nama, tanggal, foto: base64Foto })
                 .then(() => {
                     const alertBox = document.getElementById('alertAbsen');
@@ -608,7 +641,6 @@ if (file.size > 10 * 1024 * 1024) {
                 const totalMasuk = riwayatKaryawan.length;
                 const namaBulan = document.getElementById('filterBulan').options[document.getElementById('filterBulan').selectedIndex].text;
                 
-                // Pasang tombol detail jika total masuk > 0
                 const tombolAksi = totalMasuk > 0 
                     ? `<button class="btn-detail" data-nama="${karyawan}">Lihat Detail</button>` 
                     : '';
@@ -647,7 +679,6 @@ if (file.size > 10 * 1024 * 1024) {
             modalTitle.innerText = `Riwayat Masuk: ${nama}`;
             modalList.innerHTML = "";
 
-            // Ambil absensi milik karyawan ini di bulan terpilih, urutkan tanggal terbaru
             const riwayatKaryawan = dataAbsensiGlobal
                 .filter(absen => {
                     if (absen.nama === nama && absen.tanggal.includes('-')) {
@@ -667,7 +698,6 @@ if (file.size > 10 * 1024 * 1024) {
                 const tglDiformat = item.tanggal.split('-').reverse().join('-');
                 const li = document.createElement('li');
                 
-                // Tag gambar kondisional jika ada foto dokumentasi
                 const wadahFoto = item.foto 
                     ? `<div class="item-doc"><img src="${item.foto}" alt="Dokumentasi" onclick="window.open('${item.foto}', '_blank')"></div>`
                     : `<div class="item-doc" style="color:var(--text-muted); font-size:11px;">Tidak ada foto</div>`;
